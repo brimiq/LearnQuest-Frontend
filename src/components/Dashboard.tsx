@@ -237,30 +237,52 @@ export function Dashboard({ userName }: DashboardProps) {
               Recommended for You
             </h3>
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
+              {[
+                {
+                  title: "Advanced React Patterns",
+                  rating: 4.9,
+                  level: "Intermediate",
+                  image:
+                    "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=100&h=100&fit=crop",
+                },
+                {
+                  title: "Machine Learning Fundamentals",
+                  rating: 4.7,
+                  level: "Beginner",
+                  image:
+                    "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=100&h=100&fit=crop",
+                },
+                {
+                  title: "UI/UX Design Masterclass",
+                  rating: 4.8,
+                  level: "Advanced",
+                  image:
+                    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&h=100&fit=crop",
+                },
+              ].map((course, i) => (
                 <div
                   key={i}
                   className="flex gap-3 items-start group cursor-pointer"
                 >
                   <div className="w-12 h-12 rounded-lg bg-secondary shrink-0 overflow-hidden">
                     <img
-                      src={`https://images.unsplash.com/photo-${i === 1 ? "1605379399642-870262d3d051" : i === 2 ? "1581091226825-a6a2a5aee158" : "1550745165-9bc0b252726f"}?w=100&h=100&fit=crop`}
-                      alt=""
+                      src={course.image}
+                      alt={course.title}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-foreground group-hover:text-accent transition-colors line-clamp-1">
-                      Introduction to Data Science
+                      {course.title}
                     </h4>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                       <Star
                         size={10}
                         className="text-yellow-500 fill-yellow-500"
                       />
-                      <span>4.8</span>
+                      <span>{course.rating}</span>
                       <span className="w-1 h-1 bg-muted-foreground rounded-full mx-1"></span>
-                      <span>Beginner</span>
+                      <span>{course.level}</span>
                     </div>
                   </div>
                 </div>
