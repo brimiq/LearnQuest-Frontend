@@ -8,14 +8,22 @@ import {
   Search, 
   Bell, 
   Menu,
-  X,
   User,
   LogOut,
   ChevronLeft,
+<<<<<<< Updated upstream
   ChevronRight
 } from 'lucide-react';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
+=======
+  ChevronRight,
+  LogOut,
+} from "lucide-react";
+import clsx from "clsx";
+import { motion, AnimatePresence } from "motion/react";
+import { useAuthStore } from "../stores/authStore";
+>>>>>>> Stashed changes
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -43,7 +51,7 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
     navItems.push({ id: 'creator', label: 'Creator Studio', icon: PlusCircle });
   }
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <div className="flex flex-col h-full bg-card border-r border-border shadow-sm">
       <div className="p-6 flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-xl">
@@ -107,8 +115,13 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
         animate={{ width: isSidebarOpen ? 260 : 80 }}
         className="hidden md:block h-full shrink-0 relative z-20"
       >
+<<<<<<< Updated upstream
         <SidebarContent />
         <button 
+=======
+        {sidebarContent}
+        <button
+>>>>>>> Stashed changes
           onClick={toggleSidebar}
           className="absolute -right-3 top-8 w-6 h-6 bg-accent text-white rounded-full flex items-center justify-center border-2 border-background shadow-sm hover:scale-110 transition-transform cursor-pointer"
         >
@@ -133,7 +146,7 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
               exit={{ x: -280 }}
               className="fixed inset-y-0 left-0 w-[280px] z-50 md:hidden"
             >
-              <SidebarContent />
+              {sidebarContent}
             </motion.div>
           </>
         )}
@@ -169,6 +182,7 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
             <div className="h-6 w-px bg-border mx-1"></div>
             
             {isLoggedIn ? (
+<<<<<<< Updated upstream
               <button className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-full hover:bg-secondary/50 transition-colors">
                 <div className="text-right hidden sm:block">
                   <div className="text-sm font-semibold text-foreground">Alex Chen</div>
@@ -182,6 +196,34 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
                   />
                 </div>
               </button>
+=======
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 pl-2 pr-1 py-1">
+                  <div className="text-right hidden sm:block">
+                    <div className="text-sm font-semibold text-foreground">
+                      {userName}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {userRole}
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-primary/30 border-2 border-primary flex items-center justify-center overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop"
+                      alt="User"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={() => useAuthStore.getState().logout()}
+                  className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut size={18} />
+                </button>
+              </div>
+>>>>>>> Stashed changes
             ) : (
               <button 
                 onClick={onOpenAuth}

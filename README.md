@@ -1,73 +1,123 @@
-# React + TypeScript + Vite
+# LearnQuest Frontend 🎓
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React-based frontend for the LearnQuest Crowdsourced Learning Platform with Gamification.
 
-Currently, two official plugins are available:
+## Team Members (Group 7)
+- **Ibrahim Abdu** - Project Leader, Backend Architecture & Integration
+- **Bradley Murimi** - Backend Developer (Auth & Gamification)
+- **Julius Mutinda** - Frontend Developer (Auth & Learning)
+- **Joyce Njogu** - Frontend Developer Lead (UI Components)
+- **Ephrahim Otieno** - Full Stack Developer (Community Features)
+- **Craig Omore** - Full Stack Developer (Admin & Creator)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
+- ✅ Modern, responsive UI with TailwindCSS
+- ✅ User Authentication (Login/Register)
+- ✅ Role-based Dashboard (Learner, Contributor, Admin)
+- ✅ Learning Path Browser & Progress Tracking
+- ✅ Gamification Display (XP, Badges, Achievements)
+- ✅ Creator Studio for Contributors
+- ✅ Animated transitions with Framer Motion
+- ✅ State Management with Zustand
 
-## React Compiler
+## Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
+- Node.js 18+ or Bun
+- npm, yarn, or bun
 
-## Expanding the ESLint configuration
+### Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Clone the repository:
+```bash
+git clone git@github.com:MrNawir/LearnQuest-Frontend.git
+cd LearnQuest-Frontend
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Install dependencies:
+```bash
+# Using npm
+npm install --legacy-peer-deps
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# OR using bun
+bun install
 ```
+
+3. Start the development server:
+```bash
+npm run dev
+# OR
+bun dev
+```
+
+The app will be available at `http://localhost:3000`
+
+### Backend Connection
+
+The frontend is configured to proxy API requests to `http://localhost:5000`. Make sure the backend is running before using the app.
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── ui/             # Reusable UI components (shadcn/ui)
+│   ├── AuthModal.tsx   # Login/Register modal
+│   ├── Dashboard.tsx   # Main dashboard
+│   ├── Layout.tsx      # App layout with sidebar
+│   ├── LearningPath.tsx # Learning path view
+│   ├── CreatorStudio.tsx # Content creation
+│   └── Gamification.tsx # Achievements & badges
+├── services/           # API service layer
+│   ├── api.ts         # Axios instance with interceptors
+│   ├── authService.ts # Authentication API calls
+│   ├── userService.ts # User-related API calls
+│   ├── learningPathService.ts # Learning path API
+│   └── commentService.ts # Comments API
+├── stores/            # Zustand state stores
+│   └── authStore.ts   # Authentication state
+└── styles/            # Global styles
+```
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Tech Stack
+
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool & dev server
+- **TailwindCSS** - Utility-first CSS
+- **Radix UI** - Accessible UI primitives
+- **Zustand** - State management
+- **Axios** - HTTP client
+- **Framer Motion** - Animations
+- **Lucide React** - Icons
+
+## User Roles
+
+| Role        | Access                                          |
+|-------------|-------------------------------------------------|
+| Learner     | Dashboard, Learning Paths, Achievements         |
+| Contributor | All Learner features + Creator Studio           |
+| Admin       | All features + Admin Dashboard (coming soon)    |
+
+## Environment Variables
+
+Create a `.env` file for custom configuration:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+## Design
+
+The UI is based on Figma designs:
+- [LearnQuest Figma Design](https://www.figma.com/design/EzvyETFHq479ulBnTppx02/LearnQuest)
+
+## License
+MIT
