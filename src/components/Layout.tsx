@@ -12,6 +12,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  Shield,
 } from "lucide-react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "motion/react";
@@ -49,6 +50,10 @@ export function Layout({
 
   if (userRole === "Contributor" || userRole === "Admin") {
     navItems.push({ id: "creator", label: "Creator Studio", icon: PlusCircle });
+  }
+
+  if (userRole === "Admin") {
+    navItems.push({ id: "admin", label: "Admin Dashboard", icon: Shield });
   }
 
   const SidebarContent = () => (

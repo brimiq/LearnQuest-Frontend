@@ -8,6 +8,7 @@ import { AuthModal } from "./components/AuthModal";
 import { LandingPage } from "./components/LandingPage";
 import { LessonView } from "./components/LessonView";
 import { ContactUs } from "./components/ContactUs";
+import { AdminDashboard } from "./components/admin/AdminDashboard";
 import { AnimatePresence } from "motion/react";
 
 export default function App() {
@@ -20,7 +21,7 @@ export default function App() {
   const [showContact, setShowContact] = useState(false);
 
   const [userRole, setUserRole] = useState<"Learner" | "Contributor" | "Admin">(
-    "Contributor",
+    "Admin",
   );
 
   const handleLogin = (username: string) => {
@@ -51,6 +52,8 @@ export default function App() {
         return <Gamification />;
       case "creator":
         return <CreatorStudio />;
+      case "admin":
+        return <AdminDashboard />;
       default:
         return <Dashboard userName={userName} />;
     }
