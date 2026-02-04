@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   BookOpen,
   LayoutDashboard,
@@ -12,9 +13,11 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "motion/react";
+import { useAuthStore } from "../stores/authStore";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -35,20 +38,28 @@ export function Layout({
   isLoggedIn,
   userName,
 }: LayoutProps) {
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "learning-path", label: "My Learning", icon: BookOpen },
-    { id: "gamification", label: "Achievements", icon: Trophy },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { id: "learning-path", label: "My Learning", icon: BookOpen, path: "/learning-path" },
+    { id: "gamification", label: "Achievements", icon: Trophy, path: "/gamification" },
   ];
 
   if (userRole === "Contributor" || userRole === "Admin") {
-    navItems.push({ id: "creator", label: "Creator Studio", icon: PlusCircle });
+    navItems.push({ id: "creator", label: "Creator Studio", icon: PlusCircle, path: "/creator" });
   }
 
   const SidebarContent = () => (
@@ -66,8 +77,9 @@ export function Layout({
 
       <nav className="flex-1 px-4 py-4 space-y-2">
         {navItems.map((item) => (
-          <button
+          <Link
             key={item.id}
+            to={item.path}
             onClick={() => {
               setActiveTab(item.id);
               setIsMobileMenuOpen(false);
@@ -84,7 +96,7 @@ export function Layout({
               className={activeTab === item.id ? "text-accent" : ""}
             />
             {(isSidebarOpen || isMobileMenuOpen) && <span>{item.label}</span>}
-          </button>
+          </Link>
         ))}
       </nav>
 
@@ -100,6 +112,17 @@ export function Layout({
             </div>
           </div>
         )}
+
+        <button
+          onClick={handleLogout}
+          className={clsx(
+            "w-full flex items-center gap-3 px-4 py-3 mb-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors text-sm font-medium",
+            !isSidebarOpen && "justify-center",
+          )}
+        >
+          <LogOut size={20} />
+          {(isSidebarOpen || isMobileMenuOpen) && <span>Logout</span>}
+        </button>
 
         <button
           className={clsx(
