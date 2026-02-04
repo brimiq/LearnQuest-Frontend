@@ -62,6 +62,10 @@ export function Layout({
     navItems.push({ id: "creator", label: "Creator Studio", icon: PlusCircle, path: "/creator" });
   }
 
+  if (userRole === "Admin") {
+    navItems.push({ id: "admin", label: "Admin Dashboard", icon: Shield });
+  }
+
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-card border-r border-border shadow-sm">
       <div className="p-6 flex items-center gap-3">
