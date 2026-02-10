@@ -1,89 +1,214 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Save, ArrowRight, ArrowLeft, Upload, Plus, Trash2, FileText, Video, HelpCircle } from 'lucide-react';
+import { Save, ArrowRight, ArrowLeft, Upload, Plus, Trash2, FileText, Video, CheckCircle2, Link } from 'lucide-react';
 import clsx from 'clsx';
+import { toast } from 'sonner';
+import api from '../services/api';
+
+interface ModuleForm {
+  title: string;
+  description: string;
+  resources: { title: string; type: 'video' | 'article'; url: string }[];
+}
 
 export function CreatorStudio() {
   const [step, setStep] = useState(1);
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
+  const [error, setError] = useState('');
+
+  // Form state
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('Development');
+  const [difficulty, setDifficulty] = useState('beginner');
+  const [imageUrl, setImageUrl] = useState('');
+  const [modules, setModules] = useState<ModuleForm[]>([
+    { title: 'Module 1', description: '', resources: [{ title: '', type: 'video', url: '' }] }
+  ]);
+
   const steps = [
     { num: 1, label: "Basic Info" },
     { num: 2, label: "Content" },
-    { num: 3, label: "Quiz" },
-    { num: 4, label: "Preview" }
+    { num: 3, label: "Preview" }
   ];
+
+  const addModule = () => {
+    setModules([...modules, { title: `Module ${modules.length + 1}`, description: '', resources: [{ title: '', type: 'video', url: '' }] }]);
+  };
+
+  const removeModule = (idx: number) => {
+    if (modules.length <= 1) return;
+    setModules(modules.filter((_, i) => i !== idx));
+  };
+
+  const updateModule = (idx: number, field: keyof ModuleForm, value: string) => {
+    const updated = [...modules];
+    (updated[idx] as any)[field] = value;
+    setModules(updated);
+  };
+
+  const addResource = (modIdx: number) => {
+    const updated = [...modules];
+    updated[modIdx].resources.push({ title: '', type: 'article', url: '' });
+    setModules(updated);
+  };
+
+  const removeResource = (modIdx: number, resIdx: number) => {
+    const updated = [...modules];
+    if (updated[modIdx].resources.length <= 1) return;
+    updated[modIdx].resources = updated[modIdx].resources.filter((_, i) => i !== resIdx);
+    setModules(updated);
+  };
+
+  const updateResource = (modIdx: number, resIdx: number, field: string, value: string) => {
+    const updated = [...modules];
+    (updated[modIdx].resources[resIdx] as any)[field] = value;
+    setModules(updated);
+  };
+
+  const totalResources = modules.reduce((sum, m) => sum + m.resources.filter(r => r.title).length, 0);
+
+  const handlePublish = async () => {
+    setIsSubmitting(true);
+    setError('');
+    try {
+      // 1. Create the learning path
+      const pathRes = await api.post('/learning-paths/', {
+        title, description, category, difficulty,
+        image_url: imageUrl || `https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=400&fit=crop`,
+        xp_reward: modules.length * 100
+      });
+      const pathId = pathRes.data.learning_path.id;
+
+      // 2. Create modules and resources
+      for (let i = 0; i < modules.length; i++) {
+        const mod = modules[i];
+        if (!mod.title) continue;
+        const modRes = await api.post(`/learning-paths/${pathId}/modules`, {
+          title: mod.title,
+          description: mod.description || `Learn about ${mod.title}`,
+          order: i,
+          xp_reward: 50
+        });
+        const moduleId = modRes.data.module.id;
+
+        for (let j = 0; j < mod.resources.length; j++) {
+          const res = mod.resources[j];
+          if (!res.title) continue;
+          await api.post(`/learning-paths/modules/${moduleId}/resources`, {
+            title: res.title,
+            resource_type: res.type,
+            url: res.url || '#',
+            order: j
+          });
+        }
+      }
+
+      setIsPublished(true);
+      toast.success('Learning path published successfully!');
+    } catch (e: any) {
+      const msg = e.response?.data?.error || 'Failed to publish. Make sure you are logged in as a Contributor or Admin.';
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isPublished) {
+    return (
+      <div className="max-w-2xl mx-auto text-center py-20">
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+          <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 size={48} />
+          </div>
+          <h2 className="text-3xl font-bold text-base-content mb-3">Learning Path Published!</h2>
+          <p className="text-base-content/60 mb-8">Your learning path "{title}" has been submitted and is pending admin approval.</p>
+          <button onClick={() => { setIsPublished(false); setStep(1); setTitle(''); setDescription(''); setModules([{ title: 'Module 1', description: '', resources: [{ title: '', type: 'video', url: '' }] }]); }}
+            className="px-8 py-3 bg-primary text-primary-content rounded-xl font-bold hover:bg-primary/90 transition-colors">
+            Create Another
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  const inputClass = "w-full px-4 py-3 bg-base-300/20 border border-base-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all";
 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Create New Resource</h1>
-        <p className="text-muted-foreground">Share your knowledge with the community.</p>
+        <h1 className="text-3xl font-bold text-base-content">Create New Learning Path</h1>
+        <p className="text-base-content/60">Share your knowledge with the community.</p>
       </div>
 
       {/* Progress Stepper */}
       <div className="mb-8">
         <div className="flex items-center justify-between relative">
-          <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-secondary -z-10"></div>
+          <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-base-300 -z-10"></div>
           {steps.map((s) => (
-            <div key={s.num} className="flex flex-col items-center gap-2 bg-background px-2">
+            <div key={s.num} className="flex flex-col items-center gap-2 bg-base-100 px-2">
               <div className={clsx(
                 "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300",
-                step >= s.num ? "bg-accent text-white" : "bg-secondary text-muted-foreground"
+                step >= s.num ? "bg-primary text-primary-content" : "bg-base-300 text-base-content/60"
               )}>
                 {s.num}
               </div>
               <span className={clsx(
                 "text-xs font-medium transition-colors duration-300",
-                step >= s.num ? "text-accent" : "text-muted-foreground"
+                step >= s.num ? "text-primary" : "text-base-content/60"
               )}>{s.label}</span>
             </div>
           ))}
         </div>
       </div>
 
+      {error && (
+        <div className="mb-6 p-4 bg-error/10 border border-error/20 rounded-xl text-error text-sm">{error}</div>
+      )}
+
       {/* Form Container */}
-      <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
+      <div className="bg-base-200 border border-base-300 rounded-2xl p-8 shadow-sm">
         {step === 1 && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-foreground">Resource Title</label>
-              <input type="text" placeholder="e.g. Introduction to React Hooks" className="w-full px-4 py-3 bg-secondary/20 border border-border rounded-xl focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none transition-all" />
+              <label className="text-sm font-bold text-base-content">Learning Path Title *</label>
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Introduction to React Hooks" className={inputClass} />
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-bold text-foreground">Description</label>
-              <textarea rows={4} placeholder="What will students learn from this resource?" className="w-full px-4 py-3 bg-secondary/20 border border-border rounded-xl focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none transition-all resize-none" />
+              <label className="text-sm font-bold text-base-content">Description *</label>
+              <textarea rows={4} value={description} onChange={e => setDescription(e.target.value)} placeholder="What will students learn?" className={inputClass + " resize-none"} />
             </div>
             
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-foreground">Category</label>
-                <select className="w-full px-4 py-3 bg-secondary/20 border border-border rounded-xl focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none transition-all">
-                  <option>Development</option>
-                  <option>Design</option>
-                  <option>Business</option>
-                  <option>Science</option>
+                <label className="text-sm font-bold text-base-content">Category</label>
+                <select value={category} onChange={e => setCategory(e.target.value)} className={inputClass}>
+                  <option value="Development">Development</option>
+                  <option value="Design">Design</option>
+                  <option value="Data Science">Data Science</option>
+                  <option value="DevOps">DevOps</option>
+                  <option value="Business">Business</option>
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-foreground">Difficulty Level</label>
-                <select className="w-full px-4 py-3 bg-secondary/20 border border-border rounded-xl focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none transition-all">
-                  <option>Beginner</option>
-                  <option>Intermediate</option>
-                  <option>Advanced</option>
+                <label className="text-sm font-bold text-base-content">Difficulty Level</label>
+                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} className={inputClass}>
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
                 </select>
               </div>
             </div>
 
             <div className="space-y-2">
-               <label className="text-sm font-bold text-foreground">Cover Image</label>
-               <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-secondary/20 transition-colors cursor-pointer">
-                  <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-muted-foreground mb-3">
-                    <Upload size={20} />
-                  </div>
-                  <p className="text-sm font-medium text-foreground">Click to upload or drag and drop</p>
-                  <p className="text-xs text-muted-foreground mt-1">SVG, PNG, JPG or GIF (max. 800x400px)</p>
+               <label className="text-sm font-bold text-base-content">Cover Image URL (optional)</label>
+               <div className="flex gap-3">
+                 <input type="url" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://images.unsplash.com/..." className={inputClass} />
                </div>
+               {imageUrl && <img src={imageUrl} alt="Preview" className="mt-2 w-full h-40 object-cover rounded-xl border border-base-300" />}
             </div>
           </motion.div>
         )}
@@ -91,102 +216,101 @@ export function CreatorStudio() {
         {step === 2 && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg">Modules & Lessons</h3>
-              <button className="text-accent text-sm font-bold flex items-center gap-1">
-                <Plus size={16} />
-                Add Module
+              <h3 className="font-bold text-lg text-base-content">Modules & Resources</h3>
+              <button onClick={addModule} className="text-primary text-sm font-bold flex items-center gap-1 hover:text-primary/80">
+                <Plus size={16} /> Add Module
               </button>
             </div>
 
-            <div className="border border-border rounded-xl overflow-hidden">
-               <div className="bg-secondary/30 p-4 flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                   <div className="w-6 h-6 rounded-full bg-accent text-white flex items-center justify-center text-xs font-bold">1</div>
-                   <span className="font-bold text-foreground">Module 1</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                   <button className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg"><Plus size={16} /></button>
-                   <button className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"><Trash2 size={16} /></button>
-                 </div>
-               </div>
-               
-               <div className="p-4 space-y-3 bg-card">
-                 <div className="flex items-center gap-3 p-3 border border-border rounded-lg bg-secondary/10">
-                   <FileText size={18} className="text-muted-foreground" />
-                   <input type="text" value="Introduction to the topic" className="bg-transparent border-none outline-none text-sm font-medium flex-1" />
-                   <span className="text-xs text-muted-foreground">Reading</span>
-                 </div>
-                 <div className="flex items-center gap-3 p-3 border border-border rounded-lg bg-secondary/10">
-                   <Video size={18} className="text-muted-foreground" />
-                   <input type="text" value="Video Walkthrough" className="bg-transparent border-none outline-none text-sm font-medium flex-1" />
-                   <span className="text-xs text-muted-foreground">Video</span>
-                 </div>
-               </div>
-            </div>
+            {modules.map((mod, modIdx) => (
+              <div key={modIdx} className="border border-base-300 rounded-xl overflow-hidden">
+                <div className="bg-base-300/30 p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-6 h-6 rounded-full bg-primary text-primary-content flex items-center justify-center text-xs font-bold shrink-0">{modIdx + 1}</div>
+                    <input type="text" value={mod.title} onChange={e => updateModule(modIdx, 'title', e.target.value)} className="bg-transparent border-none outline-none font-bold text-base-content flex-1" placeholder="Module title" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => addResource(modIdx)} className="p-1.5 text-base-content/60 hover:text-base-content hover:bg-base-300 rounded-lg"><Plus size={16} /></button>
+                    {modules.length > 1 && <button onClick={() => removeModule(modIdx)} className="p-1.5 text-base-content/60 hover:text-error hover:bg-error/10 rounded-lg"><Trash2 size={16} /></button>}
+                  </div>
+                </div>
+                
+                <div className="p-4 space-y-3 bg-base-200">
+                  <input type="text" value={mod.description} onChange={e => updateModule(modIdx, 'description', e.target.value)} placeholder="Module description..." className="w-full px-3 py-2 bg-base-300/10 border border-base-300 rounded-lg text-sm outline-none focus:border-primary" />
+                  
+                  {mod.resources.map((res, resIdx) => (
+                    <div key={resIdx} className="flex items-center gap-3 p-3 border border-base-300 rounded-lg bg-base-300/10">
+                      {res.type === 'video' ? <Video size={18} className="text-base-content/60 shrink-0" /> : <FileText size={18} className="text-base-content/60 shrink-0" />}
+                      <input type="text" value={res.title} onChange={e => updateResource(modIdx, resIdx, 'title', e.target.value)} placeholder="Resource title" className="bg-transparent border-none outline-none text-sm font-medium flex-1 min-w-0" />
+                      <select value={res.type} onChange={e => updateResource(modIdx, resIdx, 'type', e.target.value)} className="text-xs bg-base-300/20 border border-base-300 rounded px-2 py-1 outline-none">
+                        <option value="video">Video</option>
+                        <option value="article">Article</option>
+                      </select>
+                      <Link size={14} className="text-base-content/40 shrink-0" />
+                      <input type="url" value={res.url} onChange={e => updateResource(modIdx, resIdx, 'url', e.target.value)} placeholder="URL" className="bg-transparent border-none outline-none text-xs text-base-content/60 w-32" />
+                      {mod.resources.length > 1 && <button onClick={() => removeResource(modIdx, resIdx)} className="text-error/60 hover:text-error shrink-0"><Trash2 size={14} /></button>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
             
-            <button className="w-full py-3 border-2 border-dashed border-border rounded-xl text-muted-foreground font-medium hover:border-accent hover:text-accent transition-colors flex items-center justify-center gap-2">
-              <Plus size={18} />
-              Add Another Module
+            <button onClick={addModule} className="w-full py-3 border-2 border-dashed border-base-300 rounded-xl text-base-content/60 font-medium hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2">
+              <Plus size={18} /> Add Another Module
             </button>
           </motion.div>
         )}
 
         {step === 3 && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-             <div className="text-center py-10">
-                <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 text-accent">
-                   <HelpCircle size={32} />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Quiz Builder</h3>
-                <p className="text-muted-foreground max-w-md mx-auto mb-6">Create interactive quizzes to test learners' knowledge. Add multiple choice, true/false, or coding challenges.</p>
-                <button className="px-6 py-3 bg-accent text-white rounded-xl font-bold shadow-lg shadow-accent/20">
-                   Add First Question
-                </button>
-             </div>
-          </motion.div>
-        )}
-
-        {step === 4 && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                <Save size={32} />
              </div>
-             <h2 className="text-2xl font-bold text-foreground">Ready to Publish?</h2>
-             <p className="text-muted-foreground">Your resource will be reviewed by admins before going live.</p>
+             <h2 className="text-2xl font-bold text-base-content">Ready to Publish?</h2>
+             <p className="text-base-content/60">Your learning path will be reviewed by admins before going live.</p>
              
-             <div className="bg-secondary/30 p-6 rounded-xl text-left max-w-md mx-auto mt-6">
-               <h4 className="font-bold mb-2">Summary</h4>
-               <ul className="space-y-2 text-sm text-muted-foreground">
-                 <li className="flex justify-between"><span>Title:</span> <span className="font-medium text-foreground">React Hooks Deep Dive</span></li>
-                 <li className="flex justify-between"><span>Modules:</span> <span className="font-medium text-foreground">4</span></li>
-                 <li className="flex justify-between"><span>Lessons:</span> <span className="font-medium text-foreground">12</span></li>
-                 <li className="flex justify-between"><span>Est. Duration:</span> <span className="font-medium text-foreground">2h 45m</span></li>
+             <div className="bg-base-300/30 p-6 rounded-xl text-left max-w-md mx-auto mt-6">
+               <h4 className="font-bold mb-3 text-base-content">Summary</h4>
+               <ul className="space-y-2 text-sm text-base-content/60">
+                 <li className="flex justify-between"><span>Title:</span> <span className="font-medium text-base-content">{title || 'Untitled'}</span></li>
+                 <li className="flex justify-between"><span>Category:</span> <span className="font-medium text-base-content">{category}</span></li>
+                 <li className="flex justify-between"><span>Difficulty:</span> <span className="font-medium text-base-content capitalize">{difficulty}</span></li>
+                 <li className="flex justify-between"><span>Modules:</span> <span className="font-medium text-base-content">{modules.length}</span></li>
+                 <li className="flex justify-between"><span>Resources:</span> <span className="font-medium text-base-content">{totalResources}</span></li>
+                 <li className="flex justify-between"><span>XP Reward:</span> <span className="font-medium text-base-content">{modules.length * 100}</span></li>
                </ul>
              </div>
+
+             {!title && <p className="text-error text-sm">Please add a title in Step 1</p>}
           </motion.div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-base-300">
            <button 
              onClick={() => setStep(Math.max(1, step - 1))}
              disabled={step === 1}
-             className="px-6 py-2 text-muted-foreground font-medium hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+             className="px-6 py-2 text-base-content/60 font-medium hover:text-base-content disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
            >
-             <ArrowLeft size={16} />
-             Back
+             <ArrowLeft size={16} /> Back
            </button>
            
-           <button 
-             onClick={() => setStep(Math.min(4, step + 1))}
-             className="px-8 py-3 bg-primary text-primary-foreground rounded-xl font-bold shadow-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
-           >
-             {step === 4 ? (
-               <>Publish <Upload size={16} /></>
-             ) : (
-               <>Next Step <ArrowRight size={16} /></>
-             )}
-           </button>
+           {step === 3 ? (
+             <button 
+               onClick={handlePublish}
+               disabled={isSubmitting || !title || !description}
+               className="px-8 py-3 bg-primary text-primary-content rounded-xl font-bold shadow-sm hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+             >
+               {isSubmitting ? 'Publishing...' : <><Upload size={16} /> Publish</>}
+             </button>
+           ) : (
+             <button 
+               onClick={() => setStep(Math.min(3, step + 1))}
+               className="px-8 py-3 bg-primary text-primary-content rounded-xl font-bold shadow-sm hover:bg-primary/90 transition-colors flex items-center gap-2"
+             >
+               Next Step <ArrowRight size={16} />
+             </button>
+           )}
         </div>
       </div>
     </div>

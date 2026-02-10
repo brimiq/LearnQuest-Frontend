@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   BookOpen, 
   LayoutDashboard, 
@@ -8,12 +8,17 @@ import {
   Search, 
   Bell, 
   Menu,
-  X,
-  User,
+  User as UserIcon,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Shield,
+  Flame,
+  Star,
+  CheckCircle2,
+  Gift
 } from 'lucide-react';
+import type { User } from '../types';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -24,11 +29,36 @@ interface LayoutProps {
   userRole: 'Learner' | 'Contributor' | 'Admin';
   onOpenAuth: () => void;
   isLoggedIn: boolean;
+  onLogout?: () => void;
+  user?: User | null;
 }
 
-export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth, isLoggedIn }: LayoutProps) {
+const NOTIFICATIONS = [
+  { id: 1, icon: Flame, color: 'text-orange-500', bg: 'bg-orange-500/10', title: 'Streak milestone!', desc: 'You\'ve maintained your learning streak. Keep going!', time: '2m ago', read: false },
+  { id: 2, icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-500/10', title: 'New XP earned', desc: 'You earned XP from completing a resource.', time: '1h ago', read: false },
+  { id: 3, icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10', title: 'Quiz passed!', desc: 'Great job on the HTML & CSS Quiz!', time: '3h ago', read: true },
+  { id: 4, icon: Gift, color: 'text-purple-500', bg: 'bg-purple-500/10', title: 'New challenge available', desc: 'A weekly challenge is waiting for you.', time: '1d ago', read: true },
+];
+
+export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth, isLoggedIn, onLogout, user }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState(NOTIFICATIONS);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+  const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -43,14 +73,18 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
     navItems.push({ id: 'creator', label: 'Creator Studio', icon: PlusCircle });
   }
 
+  if (userRole === 'Admin') {
+    navItems.push({ id: 'admin', label: 'Admin Panel', icon: Shield });
+  }
+
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-card border-r border-border shadow-sm">
+    <div className="flex flex-col h-full bg-base-200 border-r border-base-300 shadow-sm">
       <div className="p-6 flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-xl">
           L
         </div>
         {(isSidebarOpen || isMobileMenuOpen) && (
-          <span className="font-bold text-xl tracking-tight text-foreground">LearnQuest</span>
+          <span className="font-bold text-xl tracking-tight text-base-content">LearnQuest</span>
         )}
       </div>
 
@@ -65,34 +99,43 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
             className={clsx(
               "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium",
               activeTab === item.id 
-                ? "bg-primary/20 text-accent-foreground" 
-                : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                ? "bg-primary text-primary-content" 
+                : "text-base-content/60 hover:bg-base-300 hover:text-base-content"
             )}
           >
-            <item.icon size={20} className={activeTab === item.id ? "text-accent" : ""} />
+            <item.icon size={20} className={activeTab === item.id ? "text-primary-content" : ""} />
             {(isSidebarOpen || isMobileMenuOpen) && <span>{item.label}</span>}
           </button>
         ))}
       </nav>
 
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-base-300">
         {(isSidebarOpen || isMobileMenuOpen) && (
           <div className="mb-4 px-4">
-             <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+             <div className="text-xs font-semibold text-base-content/60 mb-2 uppercase tracking-wider">
                Status
              </div>
-             <div className="bg-secondary/50 p-3 rounded-lg flex items-center gap-3">
+             <div className="bg-base-300/50 p-3 rounded-lg flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                 <span className="text-sm font-medium">Online</span>
              </div>
           </div>
         )}
         
-        <button className={clsx(
-          "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors text-sm font-medium",
-          !isSidebarOpen && "justify-center"
-        )}>
-          <Settings size={20} />
+        <button 
+          onClick={() => {
+            setActiveTab('settings');
+            setIsMobileMenuOpen(false);
+          }}
+          className={clsx(
+            "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium",
+            activeTab === 'settings' 
+              ? "bg-primary text-primary-content" 
+              : "text-base-content/60 hover:bg-base-300 hover:text-base-content",
+            !isSidebarOpen && !isMobileMenuOpen && "justify-center"
+          )}
+        >
+          <Settings size={20} className={activeTab === 'settings' ? "text-primary-content" : ""} />
           {(isSidebarOpen || isMobileMenuOpen) && <span>Settings</span>}
         </button>
       </div>
@@ -100,7 +143,7 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
   );
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-base-100 overflow-hidden">
       {/* Desktop Sidebar */}
       <motion.aside 
         initial={false}
@@ -110,7 +153,7 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
         <SidebarContent />
         <button 
           onClick={toggleSidebar}
-          className="absolute -right-3 top-8 w-6 h-6 bg-accent text-white rounded-full flex items-center justify-center border-2 border-background shadow-sm hover:scale-110 transition-transform cursor-pointer"
+          className="absolute -right-3 top-8 w-6 h-6 bg-accent text-white rounded-full flex items-center justify-center border-2 border-base-100 shadow-sm hover:scale-110 transition-transform cursor-pointer"
         >
           {isSidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
         </button>
@@ -141,53 +184,127 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
 
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Top Header */}
-        <header className="h-16 border-b border-border bg-card/80 backdrop-blur-sm flex items-center justify-between px-4 md:px-8 z-10 shrink-0">
+        <header className="h-16 border-b border-base-300 bg-base-200/80 backdrop-blur-sm flex items-center justify-between px-4 md:px-8 z-10 shrink-0">
           <div className="flex items-center gap-4">
             <button 
               onClick={toggleMobileMenu}
-              className="md:hidden p-2 text-muted-foreground hover:bg-secondary rounded-lg"
+              className="md:hidden p-2 text-base-content/60 hover:bg-base-300 rounded-lg"
             >
               <Menu size={20} />
             </button>
             
             <div className="relative hidden sm:block w-64 md:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/60" size={16} />
               <input 
                 type="text" 
                 placeholder="Search paths, mentors, quizzes..." 
-                className="w-full pl-10 pr-4 py-2 bg-secondary/30 border border-transparent focus:border-accent focus:bg-card focus:ring-2 focus:ring-accent/20 rounded-full text-sm transition-all outline-none"
+                className="w-full pl-10 pr-4 py-2 bg-base-300/30 border border-transparent focus:border-primary focus:bg-base-100 focus:ring-2 focus:ring-primary/20 rounded-full text-sm transition-all outline-none"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
-            <button className="relative p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border border-card"></span>
-            </button>
-            
-            <div className="h-6 w-px bg-border mx-1"></div>
-            
-            {isLoggedIn ? (
-              <button className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-full hover:bg-secondary/50 transition-colors">
-                <div className="text-right hidden sm:block">
-                  <div className="text-sm font-semibold text-foreground">Alex Chen</div>
-                  <div className="text-xs text-muted-foreground">Level 12 Scholar</div>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-primary/30 border-2 border-primary flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop" 
-                    alt="User" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+            <div className="relative" ref={notifRef}>
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 text-base-content/60 hover:bg-base-300 rounded-full transition-colors"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-error rounded-full border-2 border-base-200 text-[9px] font-bold text-white flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
+
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-12 w-80 bg-base-200 border border-base-300 rounded-2xl shadow-xl overflow-hidden z-50"
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-base-300">
+                      <h3 className="font-bold text-base-content text-sm">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <button onClick={markAllRead} className="text-xs text-primary font-medium hover:underline">
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-80 overflow-y-auto divide-y divide-base-300">
+                      {notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          onClick={() => setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))}
+                          className={clsx(
+                            "flex gap-3 px-4 py-3 cursor-pointer hover:bg-base-300/30 transition-colors",
+                            !n.read && "bg-primary/5"
+                          )}
+                        >
+                          <div className={clsx("w-9 h-9 rounded-full flex items-center justify-center shrink-0", n.bg, n.color)}>
+                            <n.icon size={16} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={clsx("text-sm leading-tight", !n.read ? "font-bold text-base-content" : "font-medium text-base-content/80")}>{n.title}</p>
+                            <p className="text-xs text-base-content/60 mt-0.5 line-clamp-1">{n.desc}</p>
+                            <p className="text-[10px] text-base-content/40 mt-1">{n.time}</p>
+                          </div>
+                          {!n.read && <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0"></div>}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="px-4 py-2.5 border-t border-base-300 text-center">
+                      <button className="text-xs text-primary font-medium hover:underline">View all notifications</button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            
+            <div className="h-6 w-px bg-base-300 mx-1"></div>
+            
+            {isLoggedIn && user ? (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 pl-2 pr-3 py-1 rounded-full hover:bg-base-300/50 transition-colors">
+                  <div className="text-right hidden sm:block">
+                    <div className="text-sm font-semibold text-base-content">{user.username?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</div>
+                    <div className="text-xs text-base-content/60">
+                      {user.xp?.toLocaleString() || 0} XP | {user.streak_days || 0} day streak
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center overflow-hidden">
+                    {user.avatar_url ? (
+                      <img 
+                        src={user.avatar_url} 
+                        alt={user.username} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-primary">
+                        {user.username?.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {onLogout && (
+                  <button 
+                    onClick={onLogout}
+                    className="p-2 text-base-content/60 hover:text-error hover:bg-error/10 rounded-full transition-colors"
+                    title="Log out"
+                  >
+                    <LogOut size={18} />
+                  </button>
+                )}
+              </div>
             ) : (
               <button 
                 onClick={onOpenAuth}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-content rounded-full text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
               >
-                <User size={16} />
+                <UserIcon size={16} />
                 <span>Sign In</span>
               </button>
             )}
