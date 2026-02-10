@@ -137,7 +137,7 @@ export function Dashboard({ onViewLearning, onStartLesson }: DashboardProps) {
                       <MoreHorizontal size={20} />
                     </button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-base-content/60">Progress</span>
@@ -179,7 +179,7 @@ export function Dashboard({ onViewLearning, onStartLesson }: DashboardProps) {
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Trophy size={120} />
             </div>
-            
+
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 bg-base-100/50 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary mb-4">
                 <Flame size={12} fill="currentColor" />

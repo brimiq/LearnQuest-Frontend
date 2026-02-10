@@ -1,12 +1,12 @@
 import { motion } from 'motion/react';
-import { 
-  BookOpen, 
-  Trophy, 
-  Users, 
-  ArrowRight, 
-  CheckCircle2, 
-  Zap, 
-  Globe 
+import {
+  BookOpen,
+  Trophy,
+  Users,
+  ArrowRight,
+  CheckCircle2,
+  Zap,
+  Globe
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -59,7 +59,7 @@ export function LandingPage({ onOpenAuth, onOpenContact }: LandingPageProps) {
             className="px-5 py-2.5 bg-primary text-primary-content rounded-full text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5"
           >
             Get Started
-          </button>
+          </Link>
         </div>
       </nav>
 
@@ -67,7 +67,7 @@ export function LandingPage({ onOpenAuth, onOpenContact }: LandingPageProps) {
       <main className="flex-1">
         <section className="relative pt-12 pb-20 lg:pt-24 lg:pb-32 overflow-hidden px-6">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div 
+            <motion.div
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -86,7 +86,7 @@ export function LandingPage({ onOpenAuth, onOpenContact }: LandingPageProps) {
               <motion.p variants={itemVariants} className="text-lg text-base-content/60 mb-8 max-w-lg leading-relaxed">
                 Join the community-driven platform where learning feels like a game. Earn XP, unlock badges, and climb the leaderboards while mastering new skills.
               </motion.p>
-              
+
               <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
                 <button 
                   onClick={onOpenAuth}
@@ -111,7 +111,7 @@ export function LandingPage({ onOpenAuth, onOpenContact }: LandingPageProps) {
               </motion.div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
@@ -123,12 +123,27 @@ export function LandingPage({ onOpenAuth, onOpenContact }: LandingPageProps) {
                 className="absolute inset-0 w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              
+
               {/* Floating Cards */}
               <div className="absolute bottom-8 left-8 right-8 grid gap-4">
-                 <div className="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg flex items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 fill-mode-both">
-                    <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
-                       <Trophy size={24} />
+                <div className="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg flex items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300 fill-mode-both">
+                  <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+                    <Trophy size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-foreground">New Achievement!</h3>
+                    <p className="text-xs text-muted-foreground">You unlocked "Code Ninja"</p>
+                  </div>
+                </div>
+
+                <div className="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg flex items-center gap-4 ml-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 fill-mode-both">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                    <CheckCircle2 size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-foreground">Daily Goal Met</h3>
+                    <div className="w-32 h-2 bg-secondary rounded-full mt-1 overflow-hidden">
+                      <div className="w-full h-full bg-green-500"></div>
                     </div>
                     <div>
                        <h3 className="font-bold text-base-content">New Achievement!</h3>

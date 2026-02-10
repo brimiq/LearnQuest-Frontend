@@ -26,7 +26,7 @@ interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  userRole: 'Learner' | 'Contributor' | 'Admin';
+  userRole: "Learner" | "Contributor" | "Admin";
   onOpenAuth: () => void;
   isLoggedIn: boolean;
   onLogout?: () => void;
@@ -64,13 +64,13 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'learning-path', label: 'My Learning', icon: BookOpen },
-    { id: 'gamification', label: 'Achievements', icon: Trophy },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "learning-path", label: "My Learning", icon: BookOpen },
+    { id: "gamification", label: "Achievements", icon: Trophy },
   ];
 
-  if (userRole === 'Contributor' || userRole === 'Admin') {
-    navItems.push({ id: 'creator', label: 'Creator Studio', icon: PlusCircle });
+  if (userRole === "Contributor" || userRole === "Admin") {
+    navItems.push({ id: "creator", label: "Creator Studio", icon: PlusCircle });
   }
 
   if (userRole === 'Admin') {
@@ -145,17 +145,21 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
   return (
     <div className="flex h-screen bg-base-100 overflow-hidden">
       {/* Desktop Sidebar */}
-      <motion.aside 
+      <motion.aside
         initial={false}
         animate={{ width: isSidebarOpen ? 260 : 80 }}
         className="hidden md:block h-full shrink-0 relative z-20"
       >
-        <SidebarContent />
-        <button 
+        {sidebarContent}
+        <button
           onClick={toggleSidebar}
           className="absolute -right-3 top-8 w-6 h-6 bg-accent text-white rounded-full flex items-center justify-center border-2 border-base-100 shadow-sm hover:scale-110 transition-transform cursor-pointer"
         >
-          {isSidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+          {isSidebarOpen ? (
+            <ChevronLeft size={14} />
+          ) : (
+            <ChevronRight size={14} />
+          )}
         </button>
       </motion.aside>
 
@@ -163,20 +167,20 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
               className="fixed inset-0 bg-black/50 z-40 md:hidden"
             />
-            <motion.div 
+            <motion.div
               initial={{ x: -280 }}
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               className="fixed inset-y-0 left-0 w-[280px] z-50 md:hidden"
             >
-              <SidebarContent />
+              {sidebarContent}
             </motion.div>
           </>
         )}
@@ -186,13 +190,13 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
         {/* Top Header */}
         <header className="h-16 border-b border-base-300 bg-base-200/80 backdrop-blur-sm flex items-center justify-between px-4 md:px-8 z-10 shrink-0">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={toggleMobileMenu}
               className="md:hidden p-2 text-base-content/60 hover:bg-base-300 rounded-lg"
             >
               <Menu size={20} />
             </button>
-            
+
             <div className="relative hidden sm:block w-64 md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/60" size={16} />
               <input 
@@ -300,7 +304,7 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
                 )}
               </div>
             ) : (
-              <button 
+              <button
                 onClick={onOpenAuth}
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-content rounded-full text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
               >
@@ -313,9 +317,7 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
 
         {/* Content Area */}
         <div className="flex-1 overflow-auto p-4 md:p-8">
-          <div className="max-w-7xl mx-auto w-full">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto w-full">{children}</div>
         </div>
       </main>
     </div>

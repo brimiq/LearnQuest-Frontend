@@ -76,21 +76,21 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
-      
-      <motion.div 
+
+      <motion.div
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         className="relative w-full max-w-md bg-base-200 rounded-3xl shadow-2xl overflow-hidden"
       >
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 text-base-content/60 hover:text-base-content hover:bg-base-300 rounded-full transition-colors z-10"
         >
@@ -169,8 +169,30 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
                   required
                 />
               </div>
-            </div>
-            
+            )}
+
+            {!isLoginMode && (
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-foreground ml-1">
+                  Username
+                </label>
+                <div className="relative">
+                  <User
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    placeholder="johndoe"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-secondary/20 border border-border rounded-xl focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none transition-all"
+                    required={!isLoginMode}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label className="text-sm font-bold text-base-content ml-1">Password</label>
               <div className="relative">

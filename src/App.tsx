@@ -17,7 +17,7 @@ import { useAuthStore } from './stores/authStore';
 import './stores/themeStore';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isInLessonMode, setIsInLessonMode] = useState(false);
   const [showContact, setShowContact] = useState(false);
@@ -77,7 +77,7 @@ export default function App() {
         return <LearningPath onStartLesson={(pathId) => handleLessonStart(pathId)} />;
       case 'gamification':
         return <Gamification />;
-      case 'creator':
+      case "creator":
         return <CreatorStudio />;
       case 'admin':
         return <AdminDashboard />;
@@ -106,14 +106,14 @@ export default function App() {
   if (!isAuthenticated) {
     return (
       <>
-        <LandingPage 
-          onOpenAuth={() => setIsAuthOpen(true)} 
+        <LandingPage
+          onOpenAuth={() => setIsAuthOpen(true)}
           onOpenContact={() => setShowContact(true)}
         />
         <AnimatePresence>
           {isAuthOpen && (
-            <AuthModal 
-              isOpen={isAuthOpen} 
+            <AuthModal
+              isOpen={isAuthOpen}
               onClose={() => setIsAuthOpen(false)}
               onLogin={handleLoginSuccess}
             />
@@ -147,8 +147,8 @@ export default function App() {
 
       <AnimatePresence>
         {isAuthOpen && (
-          <AuthModal 
-            isOpen={isAuthOpen} 
+          <AuthModal
+            isOpen={isAuthOpen}
             onClose={() => setIsAuthOpen(false)}
             onLogin={handleLoginSuccess}
           />
