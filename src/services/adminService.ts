@@ -34,6 +34,26 @@ const adminService = {
   deleteUser: async (userId: number) => {
     const response = await api.delete(`/admin/users/${userId}`);
     return response.data;
+  },
+
+  getReports: async () => {
+    const response = await api.get('/admin/reports');
+    return response.data.data?.reports || [];
+  },
+
+  suspendUser: async (userId: number) => {
+    const response = await api.put(`/admin/users/${userId}/suspend`);
+    return response.data;
+  },
+
+  dismissReport: async (reportId: number) => {
+    const response = await api.post(`/admin/reports/${reportId}/dismiss`);
+    return response.data;
+  },
+
+  actionReport: async (reportId: number, action: string) => {
+    const response = await api.post(`/admin/reports/${reportId}/action`, { action });
+    return response.data;
   }
 };
 

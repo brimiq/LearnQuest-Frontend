@@ -59,7 +59,7 @@ export function LandingPage({ onOpenAuth, onOpenContact }: LandingPageProps) {
             className="px-5 py-2.5 bg-primary text-primary-content rounded-full text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:-translate-y-0.5"
           >
             Get Started
-          </Link>
+          </button>
         </div>
       </nav>
 
@@ -145,23 +145,8 @@ export function LandingPage({ onOpenAuth, onOpenContact }: LandingPageProps) {
                     <div className="w-32 h-2 bg-secondary rounded-full mt-1 overflow-hidden">
                       <div className="w-full h-full bg-green-500"></div>
                     </div>
-                    <div>
-                       <h3 className="font-bold text-base-content">New Achievement!</h3>
-                       <p className="text-xs text-base-content/60">You unlocked "Code Ninja"</p>
                     </div>
-                 </div>
-                 
-                 <div className="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg flex items-center gap-4 ml-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 fill-mode-both">
-                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                       <CheckCircle2 size={24} />
-                    </div>
-                    <div>
-                       <h3 className="font-bold text-base-content">Daily Goal Met</h3>
-                       <div className="w-32 h-2 bg-base-300 rounded-full mt-1 overflow-hidden">
-                          <div className="w-full h-full bg-green-500"></div>
-                       </div>
-                    </div>
-                 </div>
+                  </div>
               </div>
             </motion.div>
           </div>

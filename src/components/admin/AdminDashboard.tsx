@@ -19,13 +19,53 @@ import {
     Flag,
 } from "lucide-react";
 import clsx from "clsx";
-import {
-    adminService,
-    AdminStats,
-    PendingPath,
-    AdminUser,
-    Report,
-} from "../../services/adminService";
+import adminService from "../../services/adminService";
+
+interface AdminStats {
+    total_users: number;
+    total_paths: number;
+    total_resources: number;
+    pending_approvals: number;
+    active_users: number;
+    reports_count: number;
+    user_growth_percent?: number;
+    total_learning_paths?: number;
+    active_learners_today?: number;
+}
+
+interface PendingPath {
+    id: number;
+    title: string;
+    description: string;
+    creator: { username: string } & Record<string, any>;
+    created_at: string;
+    modules_count: number;
+    difficulty?: string;
+    category?: string;
+}
+
+interface AdminUser {
+    id: number;
+    username: string;
+    email: string;
+    role: string;
+    xp: number;
+    created_at: string;
+    is_active: boolean;
+    status?: string;
+}
+
+interface Report {
+    id: number;
+    type: string;
+    reason: string;
+    reporter: { username: string } & Record<string, any>;
+    target: string;
+    created_at: string;
+    status: string;
+    content_type?: string;
+    content_preview?: { author: string; content: string };
+}
 
 // ============================================================================
 // Types
@@ -863,7 +903,7 @@ export function AdminDashboard() {
         try {
             await adminService.approvePath(pathId);
             setPendingPaths((prev) => prev.filter((p) => p.id !== pathId));
-            setStats((prev) =>
+            setStats((prev: AdminStats | null) =>
                 prev ? { ...prev, pending_approvals: prev.pending_approvals - 1 } : null
             );
         } catch (error) {
@@ -875,7 +915,7 @@ export function AdminDashboard() {
         try {
             await adminService.rejectPath(pathId, reason);
             setPendingPaths((prev) => prev.filter((p) => p.id !== pathId));
-            setStats((prev) =>
+            setStats((prev: AdminStats | null) =>
                 prev ? { ...prev, pending_approvals: prev.pending_approvals - 1 } : null
             );
         } catch (error) {

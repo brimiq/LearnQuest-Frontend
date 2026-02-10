@@ -150,7 +150,7 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
         animate={{ width: isSidebarOpen ? 260 : 80 }}
         className="hidden md:block h-full shrink-0 relative z-20"
       >
-        {sidebarContent}
+        <SidebarContent />
         <button
           onClick={toggleSidebar}
           className="absolute -right-3 top-8 w-6 h-6 bg-accent text-white rounded-full flex items-center justify-center border-2 border-base-100 shadow-sm hover:scale-110 transition-transform cursor-pointer"
@@ -180,7 +180,7 @@ export function Layout({ children, activeTab, setActiveTab, userRole, onOpenAuth
               exit={{ x: -280 }}
               className="fixed inset-y-0 left-0 w-[280px] z-50 md:hidden"
             >
-              {sidebarContent}
+              <SidebarContent />
             </motion.div>
           </>
         )}

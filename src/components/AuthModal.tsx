@@ -169,29 +169,7 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
                   required
                 />
               </div>
-            )}
-
-            {!isLoginMode && (
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-foreground ml-1">
-                  Username
-                </label>
-                <div className="relative">
-                  <User
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    size={18}
-                  />
-                  <input
-                    type="text"
-                    placeholder="johndoe"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-secondary/20 border border-border rounded-xl focus:ring-2 focus:ring-accent/20 focus:border-accent outline-none transition-all"
-                    required={!isLoginMode}
-                  />
-                </div>
-              </div>
-            )}
+            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-base-content ml-1">Password</label>
