@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Mail, Lock, Github, User } from 'lucide-react';
+import { X, Mail, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '../stores/authStore';
 
@@ -117,10 +117,6 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
             >
               Try Demo Account
             </button>
-            <button className="w-full py-3 border border-base-300 rounded-xl font-medium text-base-content hover:bg-base-300/30 transition-colors flex items-center justify-center gap-3">
-              <Github size={20} />
-              Continue with GitHub
-            </button>
           </div>
 
           <div className="relative my-6">
@@ -128,7 +124,7 @@ export function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) {
               <div className="w-full border-t border-base-300"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-base-200 px-2 text-base-content/60">Or continue with email</span>
+              <span className="bg-base-200 px-2 text-base-content/60">Or sign in with email</span>
             </div>
           </div>
 

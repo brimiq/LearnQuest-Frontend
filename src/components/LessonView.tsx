@@ -328,26 +328,25 @@ export function LessonView({ onBack, pathId, initialLessonIndex = 0 }: LessonVie
                         <Download size={18} /> Lesson Resources
                       </h3>
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-base-200 rounded-lg border border-base-300 hover:border-primary/50 cursor-pointer transition-colors group">
+                        <div
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = `${import.meta.env.VITE_API_URL || 'https://learnquest.qzz.io/api'}/resources/${currentLesson.id}/download`;
+                            link.download = '';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            toast.success('Downloading lesson notes...');
+                          }}
+                          className="flex items-center justify-between p-3 bg-base-200 rounded-lg border border-base-300 hover:border-primary/50 cursor-pointer transition-colors group"
+                        >
                            <div className="flex items-center gap-3">
                              <div className="w-8 h-8 rounded bg-red-100 text-red-500 flex items-center justify-center">
                                <FileText size={16} />
                              </div>
                              <div>
-                               <p className="text-sm font-bold text-base-content group-hover:text-primary">Lesson_Notes.pdf</p>
-                               <p className="text-xs text-base-content/60">2.4 MB</p>
-                             </div>
-                           </div>
-                           <Download size={16} className="text-base-content/60 group-hover:text-primary" />
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-base-200 rounded-lg border border-base-300 hover:border-primary/50 cursor-pointer transition-colors group">
-                           <div className="flex items-center gap-3">
-                             <div className="w-8 h-8 rounded bg-blue-100 text-blue-500 flex items-center justify-center">
-                               <FileText size={16} />
-                             </div>
-                             <div>
-                               <p className="text-sm font-bold text-base-content group-hover:text-primary">Starter_Files.zip</p>
-                               <p className="text-xs text-base-content/60">156 KB</p>
+                               <p className="text-sm font-bold text-base-content group-hover:text-primary">{currentLesson.title.replace(/^\d+\.\s*/, '').replace(/\s+/g, '_').slice(0, 30)}_Notes.pdf</p>
+                               <p className="text-xs text-base-content/60">PDF — Lesson Notes</p>
                              </div>
                            </div>
                            <Download size={16} className="text-base-content/60 group-hover:text-primary" />
