@@ -8,6 +8,9 @@ import { AuthModal } from './components/AuthModal';
 import { LandingPage } from './components/LandingPage';
 import { LessonView } from './components/LessonView';
 import { ContactUs } from './components/ContactUs';
+import { AboutPage } from './components/AboutPage';
+import { PrivacyPage } from './components/PrivacyPage';
+import { TermsPage } from './components/TermsPage';
 import { Settings } from './components/Settings';
 import { Quiz } from './components/Quiz';
 import { AdminDashboard } from './components/admin/AdminDashboard';
@@ -22,6 +25,9 @@ export default function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isInLessonMode, setIsInLessonMode] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const [activeQuizId, setActiveQuizId] = useState<number | null>(null);
   const [activeLessonPathId, setActiveLessonPathId] = useState<number | undefined>(undefined);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -118,6 +124,10 @@ export default function App() {
           setShowOnboarding(false);
           routeByRole();
         }}
+        onOpenAuth={() => {
+          setShowOnboarding(false);
+          setIsAuthOpen(true);
+        }}
       />
     );
   }
@@ -143,6 +153,15 @@ export default function App() {
   if (showContact) {
     return <ContactUs onBack={() => setShowContact(false)} />;
   }
+  if (showAbout) {
+    return <AboutPage onBack={() => setShowAbout(false)} />;
+  }
+  if (showPrivacy) {
+    return <PrivacyPage onBack={() => setShowPrivacy(false)} />;
+  }
+  if (showTerms) {
+    return <TermsPage onBack={() => setShowTerms(false)} />;
+  }
 
   if (!isAuthenticated) {
     return (
@@ -150,6 +169,9 @@ export default function App() {
         <LandingPage
           onOpenAuth={() => setIsAuthOpen(true)}
           onOpenContact={() => setShowContact(true)}
+          onOpenAbout={() => setShowAbout(true)}
+          onOpenPrivacy={() => setShowPrivacy(true)}
+          onOpenTerms={() => setShowTerms(true)}
         />
         <AnimatePresence>
           {isAuthOpen && (

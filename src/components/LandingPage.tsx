@@ -12,9 +12,12 @@ import {
 interface LandingPageProps {
   onOpenAuth: () => void;
   onOpenContact: () => void;
+  onOpenAbout?: () => void;
+  onOpenPrivacy?: () => void;
+  onOpenTerms?: () => void;
 }
 
-export function LandingPage({ onOpenAuth, onOpenContact }: LandingPageProps) {
+export function LandingPage({ onOpenAuth, onOpenContact, onOpenAbout, onOpenPrivacy, onOpenTerms }: LandingPageProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -244,9 +247,9 @@ export function LandingPage({ onOpenAuth, onOpenContact }: LandingPageProps) {
             </div>
             
             <div className="flex gap-8 text-sm text-base-content/60">
-               <a href="#" className="hover:text-base-content">About</a>
-               <a href="#" className="hover:text-base-content">Privacy</a>
-               <a href="#" className="hover:text-base-content">Terms</a>
+               <button onClick={onOpenAbout} className="hover:text-base-content">About</button>
+               <button onClick={onOpenPrivacy} className="hover:text-base-content">Privacy</button>
+               <button onClick={onOpenTerms} className="hover:text-base-content">Terms</button>
                <button onClick={onOpenContact} className="hover:text-base-content">Contact</button>
             </div>
             

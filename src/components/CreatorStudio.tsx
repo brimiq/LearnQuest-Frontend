@@ -239,8 +239,9 @@ export function CreatorStudio() {
           ) : myPaths.length === 0 ? (
             <div className="p-12 text-center">
               <BookOpen size={48} className="mx-auto text-base-content/20 mb-4" />
-              <p className="text-base-content/60 mb-4">You haven't created any learning paths yet.</p>
-              <button onClick={() => setActiveView('create')} className="px-6 py-2 bg-primary text-primary-content rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors">
+              <h3 className="font-bold text-base-content mb-2">No learning paths yet</h3>
+              <p className="text-base-content/60 mb-6 max-w-sm mx-auto">Share your expertise with the community by creating your first learning path.</p>
+              <button onClick={() => setActiveView('create')} className="px-6 py-3 bg-primary text-primary-content rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                 Create Your First Path
               </button>
             </div>
@@ -258,7 +259,7 @@ export function CreatorStudio() {
                         {path.is_approved ? 'Approved' : 'Pending'}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-base-content/60">
+                    <div className="flex items-center gap-4 text-sm text-base-content/60 flex-wrap">
                       <span className="flex items-center gap-1"><BookOpen size={12} /> {path.modules?.length || 0} modules</span>
                       <span className="flex items-center gap-1"><Users size={12} /> {path.enrolled_count} enrolled</span>
                       <span className="flex items-center gap-1"><Star size={12} className="text-yellow-500" /> {path.rating?.toFixed(1) || '—'}</span>
@@ -273,6 +274,23 @@ export function CreatorStudio() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Creator Tips */}
+        <div className="bg-base-200 rounded-2xl border border-base-300 p-6 shadow-sm">
+          <h3 className="font-bold text-base-content mb-4 flex items-center gap-2"><Eye size={18} className="text-primary" /> Tips for Great Content</h3>
+          <div className="grid md:grid-cols-3 gap-4">
+            {[
+              { title: 'Structure clearly', desc: 'Break content into focused modules with 3-5 resources each.' },
+              { title: 'Mix resource types', desc: 'Combine videos, articles, and exercises for varied learning.' },
+              { title: 'Add real-world examples', desc: 'Include practical projects and hands-on exercises.' },
+            ].map((tip, i) => (
+              <div key={i} className="p-4 bg-base-300/20 rounded-xl border border-base-300">
+                <h4 className="font-bold text-sm text-base-content mb-1">{tip.title}</h4>
+                <p className="text-xs text-base-content/60 leading-relaxed">{tip.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
