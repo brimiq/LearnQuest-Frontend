@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Trophy, Medal, Crown, Lock } from 'lucide-react';
+import { Trophy, Medal, Crown, Lock, Flame, Target, Calendar, Zap } from 'lucide-react';
 import clsx from 'clsx';
 import { useGamificationStore } from '../stores/gamificationStore';
 import { useAuthStore } from '../stores/authStore';
@@ -12,10 +12,12 @@ export function Gamification() {
     badges,
     userBadges,
     userRank,
+    challenges,
     fetchLeaderboard, 
     fetchBadges,
     fetchMyRank,
-    fetchUserBadges
+    fetchUserBadges,
+    fetchChallenges
   } = useGamificationStore();
   
   const [isLoading, setIsLoading] = useState(true);
@@ -29,6 +31,7 @@ export function Gamification() {
           fetchLeaderboard(activePeriod, 10),
           fetchBadges(),
           fetchMyRank(activePeriod),
+          fetchChallenges(),
           user?.id ? fetchUserBadges(user.id) : Promise.resolve()
         ]);
       } finally {
@@ -36,7 +39,7 @@ export function Gamification() {
       }
     };
     loadData();
-  }, [activePeriod, fetchLeaderboard, fetchBadges, fetchMyRank, fetchUserBadges, user?.id]);
+  }, [activePeriod, fetchLeaderboard, fetchBadges, fetchMyRank, fetchChallenges, fetchUserBadges, user?.id]);
 
   const handlePeriodChange = (period: 'weekly' | 'all_time') => {
     setActivePeriod(period);
@@ -255,6 +258,37 @@ export function Gamification() {
            
            <Medal className="absolute -bottom-4 -right-4 text-white/20 w-32 h-32 rotate-12" />
         </div>
+
+        {/* Challenges Section */}
+        {challenges.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-base-content flex items-center gap-2"><Target size={20} className="text-accent" />Active Challenges</h2>
+            {challenges.map((challenge, i) => {
+              const typeIcon = challenge.challenge_type === 'weekly' ? <Flame size={16} /> : challenge.challenge_type === 'monthly' ? <Calendar size={16} /> : <Zap size={16} />;
+              const typeColor = challenge.challenge_type === 'weekly' ? 'bg-orange-100 text-orange-600' : challenge.challenge_type === 'monthly' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600';
+              const daysLeft = challenge.end_date ? Math.max(0, Math.ceil((new Date(challenge.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : 0;
+              return (
+                <motion.div key={challenge.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="bg-base-200 rounded-xl border border-base-300 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className={clsx("w-10 h-10 rounded-lg flex items-center justify-center shrink-0", typeColor)}>{typeIcon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-bold text-sm text-base-content truncate">{challenge.title}</h4>
+                        <span className={clsx("text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase", typeColor)}>{challenge.challenge_type}</span>
+                      </div>
+                      <p className="text-xs text-base-content/60 line-clamp-2 mb-2">{challenge.description}</p>
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="font-bold text-accent">+{challenge.xp_reward} XP</span>
+                        <span className="text-base-content/40">|</span>
+                        <span className="text-base-content/60">{daysLeft} days left</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

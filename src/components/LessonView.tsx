@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import { toast } from 'sonner';
 import { useLearningStore } from '../stores/learningStore';
 import { useAuthStore } from '../stores/authStore';
+import { commentService, type Comment as ApiComment } from '../services/commentService';
 
 interface LessonItem {
   id: number;
@@ -51,6 +52,8 @@ export function LessonView({ onBack, pathId, initialLessonIndex = 0 }: LessonVie
   const [bookmarked, setBookmarked] = useState(false);
   const [notesText, setNotesText] = useState('');
   const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState<ApiComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
   
   const { currentPath, currentProgress, fetchPath, completeResource } = useLearningStore();
   const { user } = useAuthStore();
@@ -58,6 +61,11 @@ export function LessonView({ onBack, pathId, initialLessonIndex = 0 }: LessonVie
   useEffect(() => {
     if (pathId) {
       fetchPath(pathId);
+      // Load comments for this learning path
+      setCommentsLoading(true);
+      commentService.getComments({ learning_path_id: pathId }).then(data => {
+        setComments(data.comments || []);
+      }).catch(() => {}).finally(() => setCommentsLoading(false));
     }
   }, [pathId, fetchPath]);
 
@@ -365,7 +373,15 @@ export function LessonView({ onBack, pathId, initialLessonIndex = 0 }: LessonVie
                          />
                          <div className="flex justify-end mt-2">
                            <button 
-                             onClick={() => { setCommentText(''); }}
+                             onClick={async () => {
+                               if (!commentText.trim() || !pathId) return;
+                               try {
+                                 const newComment = await commentService.createComment({ content: commentText, learning_path_id: pathId });
+                                 setComments(prev => [newComment, ...prev]);
+                                 setCommentText('');
+                                 toast.success('Comment posted!');
+                               } catch { toast.error('Failed to post comment'); }
+                             }}
                              disabled={!commentText.trim()}
                              className="px-4 py-2 bg-primary text-primary-content rounded-lg text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
                            >
@@ -376,29 +392,41 @@ export function LessonView({ onBack, pathId, initialLessonIndex = 0 }: LessonVie
                      </div>
                      
                      <div className="space-y-6">
-                       {[
-                         { name: 'Sarah Jenkins', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&fit=crop', time: '2 hours ago', text: 'Does anyone have a good tool for generating accessible color palettes? The one mentioned in the video seems to be offline.', likes: 12 },
-                         { name: 'David Kim', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop', time: '5 hours ago', text: 'Great explanation of the 60-30-10 rule! I\'ve been applying it to my projects and the results are amazing.', likes: 8 },
-                       ].map((comment, i) => (
-                         <div key={i} className="flex gap-4">
-                            <div className="w-10 h-10 rounded-full bg-base-300 overflow-hidden shrink-0">
-                               <img src={comment.avatar} alt={comment.name} className="w-full h-full object-cover" />
+                       {commentsLoading ? (
+                         <div className="text-center py-8 text-base-content/60">Loading comments...</div>
+                       ) : comments.length > 0 ? comments.map((comment) => (
+                         <div key={comment.id} className="flex gap-4">
+                            <div className="w-10 h-10 rounded-full bg-base-300 overflow-hidden shrink-0 flex items-center justify-center text-primary font-bold">
+                               {comment.user?.avatar_url ? (
+                                 <img src={comment.user.avatar_url} alt={comment.user.username} className="w-full h-full object-cover" />
+                               ) : (
+                                 comment.user?.username?.charAt(0).toUpperCase() || 'U'
+                               )}
                             </div>
-                            <div>
+                            <div className="flex-1">
                                <div className="flex items-center gap-2 mb-1">
-                                 <span className="font-bold text-base-content text-sm">{comment.name}</span>
-                                 <span className="text-xs text-base-content/60">{comment.time}</span>
+                                 <span className="font-bold text-base-content text-sm">{comment.user?.username || 'User'}</span>
+                                 <span className="text-xs text-base-content/60">{comment.created_at ? new Date(comment.created_at).toLocaleDateString() : ''}</span>
                                </div>
-                               <p className="text-sm text-base-content/80 leading-relaxed">{comment.text}</p>
-                               <div className="flex items-center gap-4 mt-2">
-                                 <button className="text-xs font-bold text-base-content/60 hover:text-primary flex items-center gap-1">
-                                   <ThumbsUp size={12} /> {comment.likes}
-                                 </button>
-                                 <button className="text-xs font-bold text-base-content/60 hover:text-primary">Reply</button>
-                               </div>
+                               <p className="text-sm text-base-content/80 leading-relaxed">{comment.content}</p>
+                               {comment.replies && comment.replies.length > 0 && (
+                                 <div className="mt-3 ml-4 space-y-3 border-l-2 border-base-300 pl-4">
+                                   {comment.replies.map(reply => (
+                                     <div key={reply.id}>
+                                       <div className="flex items-center gap-2 mb-1">
+                                         <span className="font-bold text-base-content text-xs">{reply.user?.username || 'User'}</span>
+                                         <span className="text-xs text-base-content/60">{reply.created_at ? new Date(reply.created_at).toLocaleDateString() : ''}</span>
+                                       </div>
+                                       <p className="text-xs text-base-content/80">{reply.content}</p>
+                                     </div>
+                                   ))}
+                                 </div>
+                               )}
                             </div>
                          </div>
-                       ))}
+                       )) : (
+                         <div className="text-center py-8 text-base-content/60">No comments yet. Be the first to start a discussion!</div>
+                       )}
                      </div>
                    </motion.div>
                 )}
